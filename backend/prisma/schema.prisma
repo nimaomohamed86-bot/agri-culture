@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SUPPLIER
+  FARMER
+  CUSTOMER
+}
+
+enum ProductCategory {
+  FRUITS
+  VEGETABLES
+  GRAINS
+  SEEDS
+  FERTILIZERS
+  LIVESTOCK_FEED
+}
+
+enum StockStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum DeliveryStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+}
+
+enum InventoryMovementType {
+  STOCK_IN
+  STOCK_OUT
+  ADJUSTMENT
+}
+
+enum NotificationType {
+  ORDER_UPDATE
+  LOW_STOCK
+  DELIVERY_UPDATE
+  SYSTEM
+}
+
+model User {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String   @unique
+  phone     String?
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productsAsSupplier Product[]      @relation("SupplierProducts")
+  productsAsFarmer   Product[]      @relation("FarmerProducts")
+  orders             Order[]
+  cart               Cart?
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  passwordResets     PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  name        String
+  category    ProductCategory
+  description String?
+  price       Float
+  quantity    Int             @default(0)
+  unit        String          @default("Kg")
+  image       String?
+  stockStatus StockStatus     @default(IN_STOCK)
+  supplierId  String?
+  farmerId    String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  supplier           User?               @relation("SupplierProducts", fields: [supplierId], references: [id])
+  farmer             User?               @relation("FarmerProducts", fields: [farmerId], references: [id])
+  inventory          Inventory?
+  orderItems         OrderItem[]
+  cartItems          CartItem[]
+  inventoryMovements InventoryMovement[]
+}
+
+model Inventory {
+  id           String   @id @default(cuid())
+  productId    String   @unique
+  currentStock Int      @default(0)
+  minimumStock Int      @default(10)
+  updatedAt    DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model InventoryMovement {
+  id        String                @id @default(cuid())
+  productId String
+  type      InventoryMovementType
+  quantity  Int
+  note      String?
+  createdAt DateTime              @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  customerId    String
+  totalAmount   Float
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  customer User        @relation(fields: [customerId], references: [id])
+  items    OrderItem[]
+  delivery Delivery?
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Delivery {
+  id            String         @id @default(cuid())
+  orderId       String         @unique
+  driverName    String?
+  status        DeliveryStatus @default(PENDING)
+  estimatedDate DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType @default(SYSTEM)
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
