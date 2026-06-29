@@ -17,6 +17,7 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 export default function FarmerDashboard() {
   const [earnings, setEarnings] = useState(null);
   const [productCount, setProductCount] = useState(0);
+  const [farmerStats, setFarmerStats] = useState(null);
 
   useEffect(() => {
     reportApi.getFarmerEarnings().then((res) => setEarnings(res.data.data));

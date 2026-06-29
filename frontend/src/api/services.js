@@ -12,18 +12,31 @@ export const authApi = {
 
 export const productApi = {
   getAll: (params) => api.get('/products', { params }),
+
   getOne: (id) => api.get(`/products/${id}`),
+
   create: (formData) =>
     api.post('/products', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     }),
+
   update: (id, formData) =>
     api.put(`/products/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     }),
-  updateQuantity: (id, data) => api.patch(`/products/${id}/quantity`, data),
-  delete: (id) => api.delete(`/products/${id}`),
-  getCategories: () => api.get('/products/categories'),
+
+  updateQuantity: (id, data) =>
+    api.patch(`/products/${id}/quantity`, data),
+
+  delete: (id) =>
+    api.delete(`/products/${id}`),
+
+  getCategories: () =>
+    api.get('/products/categories'),
 };
 
 export const userApi = {
@@ -38,31 +51,48 @@ export const userApi = {
 export const orderApi = {
   getCart: () => api.get('/orders/cart'),
   addToCart: (data) => api.post('/orders/cart', data),
-  updateCartItem: (itemId, data) => api.put(`/orders/cart/${itemId}`, data),
-  removeFromCart: (itemId) => api.delete(`/orders/cart/${itemId}`),
-  clearCart: () => api.delete('/orders/cart'),
-  checkout: () => api.post('/orders/checkout'),
+
   getAll: (params) => api.get('/orders', { params }),
   getOne: (id) => api.get(`/orders/${id}`),
-  updateStatus: (id, data) => api.patch(`/orders/${id}/status`, data),
-  cancel: (id) => api.patch(`/orders/${id}/cancel`),
-  getInvoice: (id) => api.get(`/orders/${id}/invoice`),
+
+   create: (data) => api.post('/orders', data),
+
+  update: (id, data) =>
+    api.put(`/orders/${id}`, data),
+
+  delete: (id) =>
+    api.delete(`/orders/${id}`),
+
+  updateStatus: (id, data) =>
+    api.patch(`/orders/${id}/status`, data),
+
+  cancel: (id) =>
+    api.patch(`/orders/${id}/cancel`),
+
+  getInvoice: (id) =>
+    api.get(`/orders/${id}/invoice`),
 };
 
 export const deliveryApi = {
   getAll: (params) => api.get('/deliveries', { params }),
   getOne: (id) => api.get(`/deliveries/${id}`),
   update: (id, data) => api.put(`/deliveries/${id}`, data),
-  assignDriver: (orderId, data) => api.post(`/deliveries/assign/${orderId}`, data),
+  assignDriver: (orderId, data) =>
+    api.post(`/deliveries/assign/${orderId}`, data),
 };
 
 export const inventoryApi = {
   getAll: (params) => api.get('/inventory', { params }),
   getHistory: (params) => api.get('/inventory/history', { params }),
+
   updateMinimum: (productId, data) =>
     api.patch(`/inventory/${productId}/minimum`, data),
-  stockIn: (productId, data) => api.post(`/inventory/${productId}/stock-in`, data),
-  stockOut: (productId, data) => api.post(`/inventory/${productId}/stock-out`, data),
+
+  stockIn: (productId, data) =>
+    api.post(`/inventory/${productId}/stock-in`, data),
+
+  stockOut: (productId, data) =>
+    api.post(`/inventory/${productId}/stock-out`, data),
 };
 
 export const reportApi = {
@@ -72,10 +102,16 @@ export const reportApi = {
   getSuppliers: () => api.get('/reports/suppliers'),
   getCustomers: () => api.get('/reports/customers'),
   getFarmerEarnings: () => api.get('/reports/farmer-earnings'),
+
   exportSalesExcel: () =>
-    api.get('/reports/export/sales/excel', { responseType: 'blob' }),
+    api.get('/reports/export/sales/excel', {
+      responseType: 'blob',
+    }),
+
   exportSalesPDF: () =>
-    api.get('/reports/export/sales/pdf', { responseType: 'blob' }),
+    api.get('/reports/export/sales/pdf', {
+      responseType: 'blob',
+    }),
 };
 
 export const notificationApi = {

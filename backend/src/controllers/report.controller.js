@@ -196,13 +196,24 @@ export const getCustomerPurchases = async (req, res, next) => {
 
 export const getFarmerEarnings = async (req, res, next) => {
   try {
-    const farmerId = req.user.role === 'FARMER' ? req.user.id : req.params.farmerId;
+    const where =
+      req.user.role === 'FARMER'
+        ? { farmerId: req.user.id }
+        : {};
 
     const products = await prisma.product.findMany({
-      where: { farmerId },
+      where,
       include: {
+        farmer: {
+          select: {
+            id: true,
+            fullName: true,
+          },
+        },
         orderItems: {
-          include: { order: true },
+          include: {
+            order: true,
+          },
         },
       },
     });
@@ -211,6 +222,7 @@ export const getFarmerEarnings = async (req, res, next) => {
       p.orderItems
         .filter((oi) => oi.order.paymentStatus === 'PAID')
         .map((oi) => ({
+          farmerName: p.farmer?.fullName,
           productName: p.name,
           quantity: oi.quantity,
           revenue: oi.price * oi.quantity,
@@ -218,11 +230,18 @@ export const getFarmerEarnings = async (req, res, next) => {
         }))
     );
 
-    const totalEarnings = sales.reduce((s, sale) => s + sale.revenue, 0);
+    const totalEarnings = sales.reduce(
+      (sum, sale) => sum + sale.revenue,
+      0
+    );
 
     res.json({
       success: true,
-      data: { sales, totalEarnings, productCount: products.length },
+      data: {
+        sales,
+        totalEarnings,
+        productCount: products.length,
+      },
     });
   } catch (err) {
     next(err);

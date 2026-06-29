@@ -81,7 +81,7 @@ export default function App() {
             </Route>
 
             {/* Farmer Routes */}
-            <Route element={<ProtectedRoute roles={['FARMER']} />}>
+              <Route element={<ProtectedRoute roles={['ADMIN', 'FARMER']} />}>
               <Route path="/farmer" element={<DashboardWrapper><FarmerDashboard /></DashboardWrapper>} />
               <Route path="/farmer/products" element={<DashboardWrapper><ProductsPage farmerMode /></DashboardWrapper>} />
               <Route path="/farmer/sales" element={<DashboardWrapper><FarmerDashboard /></DashboardWrapper>} />

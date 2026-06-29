@@ -27,12 +27,14 @@ const navItems = {
     { to: '/admin/users', icon: Users, label: 'Users' },
     { to: '/admin/products', icon: Package, label: 'Products' },
     { to: '/admin/suppliers', icon: Truck, label: 'Suppliers' },
+    
     { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
     { to: '/admin/inventory', icon: Warehouse, label: 'Inventory' },
     { to: '/admin/deliveries', icon: Truck, label: 'Deliveries' },
     { to: '/admin/reports', icon: BarChart3, label: 'Reports' },
     { to: '/admin/audit-logs', icon: FileText, label: 'Audit Logs' },
   ],
+
   SUPPLIER: [
     { to: '/supplier', icon: LayoutDashboard, label: 'Dashboard', end: true },
     { to: '/supplier/products', icon: Package, label: 'Products' },
@@ -40,11 +42,13 @@ const navItems = {
     { to: '/supplier/deliveries', icon: Truck, label: 'Deliveries' },
     { to: '/supplier/inventory', icon: Warehouse, label: 'Inventory' },
   ],
+
   FARMER: [
-    { to: '/farmer', icon: LayoutDashboard, label: 'Dashboard', end: true },
+    { to: '/farmer', icon: LayoutDashboard, label: 'Farmer Dashboard', end: true },
     { to: '/farmer/products', icon: Package, label: 'My Products' },
     { to: '/farmer/sales', icon: BarChart3, label: 'Sales & Earnings' },
   ],
+
   CUSTOMER: [
     { to: '/customer', icon: LayoutDashboard, label: 'Dashboard', end: true },
     { to: '/customer/products', icon: Package, label: 'Browse Products' },
@@ -57,9 +61,14 @@ export default function DashboardLayout({ children }) {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  console.log('USER DATA:', user);
+console.log('ROLE:', user?.role);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const items = navItems[user?.role] || [];
+
+const items = navItems[user?.role?.toUpperCase()] || [];
+
+console.log('ITEMS:', items);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1024px)');

@@ -29,4 +29,4 @@ export default function SuppliersPage() {
       <DataTable columns={columns} data={suppliers} loading={loading} />
     </div>
   );
-}
+}      

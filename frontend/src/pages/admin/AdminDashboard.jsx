@@ -69,24 +69,14 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard title="Total Users" value={stats.totalUsers ?? 0} icon={Users} color="blue" />
-        <StatCard title="Products" value={stats.totalProducts ?? 0} icon={Package} color="primary" />
-        <StatCard title="Orders" value={stats.totalOrders ?? 0} icon={ShoppingCart} color="purple" />
-        <StatCard
-          title="Revenue"
-          value={formatCurrency(stats.totalRevenue ?? 0)}
-          icon={DollarSign}
-          color="primary"
-        />
-        <StatCard
-          title="Low Stock"
-          value={stats.lowStockProducts ?? 0}
-          icon={AlertTriangle}
-          color="orange"
-        />
-      </div>
+        <StatCard title="Total Users"value={stats.totalUsers ?? 0}icon={Users}color="blue"/>
+        <StatCard title="Products"value={stats.totalProducts ?? 0}icon={Package}color="primary"/>
+        <StatCard title="Orders"value={stats.totalOrders ?? 0}icon={ShoppingCart}color="purple"/>
+       <StatCard title="Revenue"value={formatCurrency(stats.totalRevenue ?? 0)}icon={DollarSign}color="primary"/>
+       <StatCard title="Low Stock"value={stats.lowStockProducts ?? 0}icon={AlertTriangle}color="orange"/>
+ </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+ <div className="grid gap-6 lg:grid-cols-2">
         <div className="card">
           <h3 className="mb-4 font-semibold">Orders by Status</h3>
           <ResponsiveContainer width="100%" height={280}>

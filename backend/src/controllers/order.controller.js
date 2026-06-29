@@ -8,6 +8,7 @@ import {
 import { sendOrderUpdateEmail } from '../config/email.js';
 import { AppError } from '../middleware/errorHandler.js';
 
+
 const getOrCreateCart = async (userId) => {
   let cart = await prisma.cart.findUnique({
     where: { userId },
@@ -85,9 +86,13 @@ export const addToCart = async (req, res, next) => {
 export const updateCartItem = async (req, res, next) => {
   try {
     const { quantity } = req.body;
+
     const item = await prisma.cartItem.findUnique({
       where: { id: req.params.itemId },
-      include: { cart: true, product: true },
+      include: {
+        cart: true,
+        product: true,
+      },
     });
 
     if (!item || item.cart.userId !== req.user.id) {
@@ -95,9 +100,10 @@ export const updateCartItem = async (req, res, next) => {
     }
 
     if (quantity <= 0) {
-      await prisma.cartItem.delete({ where: { id: item.id } });
+      await prisma.cartItem.delete({
+        where: { id: item.id },
+      });
     } else {
-      if (item.product.quantity < quantity) throw new AppError('Insufficient stock', 400);
       await prisma.cartItem.update({
         where: { id: item.id },
         data: { quantity },
@@ -105,7 +111,54 @@ export const updateCartItem = async (req, res, next) => {
     }
 
     const cart = await getOrCreateCart(req.user.id);
-    res.json({ success: true, data: cart });
+
+    res.json({
+      success: true,
+      data: cart,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+export const createOrder = async (req, res, next) => {
+  try {
+    const { customerId, totalAmount, status, paymentStatus } = req.body;
+
+    const order = await prisma.order.create({
+      data: {
+        customerId,
+        totalAmount,
+        status,
+        paymentStatus,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateOrder = async (req, res, next) => {
+  try {
+    const order = await prisma.order.update({
+      where: {
+        id: req.params.id,
+      },
+      data: {
+        totalAmount: req.body.totalAmount,
+        status: req.body.status,
+        paymentStatus: req.body.paymentStatus,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: order,
+    });
   } catch (err) {
     next(err);
   }
