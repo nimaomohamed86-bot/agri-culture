@@ -1,7 +1,7 @@
 import prisma from '../config/db.js';
 import { paginate, buildPaginationMeta, sanitizeUser } from '../utils/helpers.js';
 import { AppError } from '../middleware/errorHandler.js';
-
+import bcrypt from 'bcryptjs';
 export const getUsers = async (req, res, next) => {
   try {
     const { page, limit, search, role } = req.query;
@@ -41,6 +41,29 @@ export const getUsers = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+export const createUser = async (req, res, next) => {
+  try {
+    const { fullName, email, phone, password, role } = req.body;
+
+    const user = await prisma.user.create({
+      data: {
+        fullName,
+        email,
+        phone,
+        password, // haddii aad hash gareyso, hash ku samee halkan
+        role,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 

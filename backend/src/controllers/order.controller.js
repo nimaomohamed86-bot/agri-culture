@@ -95,8 +95,22 @@ export const updateCartItem = async (req, res, next) => {
       },
     });
 
+    console.log(
+      'PRODUCT =',
+      item?.product?.name,
+      'STOCK =',
+      item?.product?.quantity,
+      'REQUESTED =',
+      quantity
+    );
+
     if (!item || item.cart.userId !== req.user.id) {
       throw new AppError('Cart item not found', 404);
+    }
+
+    // STOCK CHECK
+    if (quantity > item.product.quantity) {
+      throw new AppError('Insufficient stock', 400);
     }
 
     if (quantity <= 0) {
@@ -122,12 +136,22 @@ export const updateCartItem = async (req, res, next) => {
 };
 export const createOrder = async (req, res, next) => {
   try {
-    const { customerId, totalAmount, status, paymentStatus } = req.body;
+    const { customerName, totalAmount, status, paymentStatus } = req.body;
+
+    const customer = await prisma.user.findFirst({
+      where: {
+        fullName: customerName,
+      },
+    });
+
+    if (!customer) {
+      throw new AppError('Customer not found', 404);
+    }
 
     const order = await prisma.order.create({
       data: {
-        customerId,
-        totalAmount,
+        customerId: customer.id,
+        totalAmount: Number(totalAmount),
         status,
         paymentStatus,
       },
@@ -141,7 +165,6 @@ export const createOrder = async (req, res, next) => {
     next(err);
   }
 };
-
 export const updateOrder = async (req, res, next) => {
   try {
     const order = await prisma.order.update({
@@ -185,11 +208,20 @@ export const removeFromCart = async (req, res, next) => {
 
 export const clearCart = async (req, res, next) => {
   try {
-    const cart = await prisma.cart.findUnique({ where: { userId: req.user.id } });
+    const cart = await prisma.cart.findUnique({
+      where: { userId: req.user.id },
+    });
+
     if (cart) {
-      await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+      await prisma.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
     }
-    res.json({ success: true, message: 'Cart cleared' });
+
+    res.json({
+      success: true,
+      message: 'Cart cleared',
+    });
   } catch (err) {
     next(err);
   }
@@ -198,18 +230,32 @@ export const clearCart = async (req, res, next) => {
 export const checkout = async (req, res, next) => {
   try {
     const cart = await getOrCreateCart(req.user.id);
-    if (!cart.items.length) throw new AppError('Cart is empty', 400);
 
-    for (const item of cart.items) {
-      if (item.product.quantity < item.quantity) {
-        throw new AppError(`Insufficient stock for ${item.product.name}`, 400);
-      }
-    }
+    console.log("===== CART ITEMS =====");
 
-    const totalAmount = cart.items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
-      0
+    if (!cart.items.length) {
+  throw new AppError('Cart is empty', 400);
+}
+
+for (const item of cart.items) {
+  console.log({
+    product: item.product.name,
+    productQty: item.product.quantity,
+    cartQty: item.quantity,
+  });
+
+  if (item.product.quantity < item.quantity) {
+    throw new AppError(
+      `Insufficient stock for ${item.product.name}`,
+      400
     );
+  }
+}
+
+const totalAmount = cart.items.reduce(
+  (sum, item) => sum + item.product.price * item.quantity,
+  0
+);
 
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
@@ -430,6 +476,23 @@ export const cancelOrder = async (req, res, next) => {
     });
 
     res.json({ success: true, message: 'Order cancelled' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteOrder = async (req, res, next) => {
+  try {
+    await prisma.order.delete({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'Order deleted successfully',
+    });
   } catch (err) {
     next(err);
   }

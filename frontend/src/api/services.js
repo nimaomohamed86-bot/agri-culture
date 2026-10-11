@@ -42,26 +42,40 @@ export const productApi = {
 export const userApi = {
   getAll: (params) => api.get('/users', { params }),
   getOne: (id) => api.get(`/users/${id}`),
+  create: (data) => api.post('/users', data),
   update: (id, data) => api.put(`/users/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
   getSuppliers: () => api.get('/users/suppliers'),
   getFarmers: () => api.get('/users/farmers'),
+
+  createSupplier: (data) => api.post('/users/suppliers', data),
+  updateSupplier: (id, data) => api.put(`/users/suppliers/${id}`, data),
+  deleteSupplier: (id) => api.delete(`/users/suppliers/${id}`),
+  
 };
 
 export const orderApi = {
   getCart: () => api.get('/orders/cart'),
+
   addToCart: (data) => api.post('/orders/cart', data),
 
+  updateCartItem: (itemId, data) =>
+    api.put(`/orders/cart/${itemId}`, data),
+
+  removeFromCart: (itemId) =>
+    api.delete(`/orders/cart/${itemId}`),
+
+  checkout: () => api.post('/orders/checkout'),
+
   getAll: (params) => api.get('/orders', { params }),
+
   getOne: (id) => api.get(`/orders/${id}`),
 
-   create: (data) => api.post('/orders', data),
+  create: (data) => api.post('/orders', data),
 
-  update: (id, data) =>
-    api.put(`/orders/${id}`, data),
+  update: (id, data) => api.put(`/orders/${id}`, data),
 
-  delete: (id) =>
-    api.delete(`/orders/${id}`),
+  delete: (id) => api.delete(`/orders/${id}`),
 
   updateStatus: (id, data) =>
     api.patch(`/orders/${id}/status`, data),
@@ -72,7 +86,6 @@ export const orderApi = {
   getInvoice: (id) =>
     api.get(`/orders/${id}/invoice`),
 };
-
 export const deliveryApi = {
   getAll: (params) => api.get('/deliveries', { params }),
   getOne: (id) => api.get(`/deliveries/${id}`),

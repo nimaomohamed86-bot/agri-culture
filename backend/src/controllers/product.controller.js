@@ -209,15 +209,53 @@ export const updateProductQuantity = async (req, res, next) => {
   }
 };
 
+
+
 export const deleteProduct = async (req, res, next) => {
   try {
-    const product = await prisma.product.findUnique({ where: { id: req.params.id } });
-    if (!product) throw new AppError('Product not found', 404);
+    const productId = req.params.id;
 
-    await prisma.product.delete({ where: { id: req.params.id } });
-    res.json({ success: true, message: 'Product deleted' });
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new AppError('Product not found', 404);
+    }
+
+    // Delete related records first
+    await prisma.cartItem.deleteMany({
+      where: { productId },
+    });
+
+    await prisma.orderItem.deleteMany({
+      where: { productId },
+    });
+
+    await prisma.inventoryMovement.deleteMany({
+      where: { productId },
+    });
+
+    await prisma.inventory.deleteMany({
+      where: { productId },
+    });
+
+    // Delete product
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+
+    res.json({
+      success: true,
+      message: 'Product deleted successfully',
+    });
   } catch (err) {
-    next(err);
+    console.error('DELETE PRODUCT ERROR:', err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Failed to delete product',
+    });
   }
 };
 

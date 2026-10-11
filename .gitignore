@@ -1,12 +1,13 @@
+
 node_modules/
+**/node_modules/
 dist/
+build/
 uploads/
+coverage/
 *.log
 .DS_Store
 
 .env
 .env.*
-
-frontend/.env
-backend/.env
-.env
+!.env.example

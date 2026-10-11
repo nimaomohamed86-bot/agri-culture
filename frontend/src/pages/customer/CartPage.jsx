@@ -25,14 +25,21 @@ export default function CartPage() {
     fetchCart();
   }, []);
 
-  const updateQuantity = async (itemId, quantity) => {
-    try {
-      await orderApi.updateCartItem(itemId, { quantity });
-      fetchCart();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update');
-    }
-  };
+ const updateQuantity = async (itemId, quantity) => {
+  try {
+    console.log("ITEM ID =", itemId);
+    console.log("NEW QUANTITY =", quantity);
+
+    const res = await orderApi.updateCartItem(itemId, { quantity });
+
+    console.log("UPDATE SUCCESS =", res.data);
+
+    fetchCart();
+  } catch (err) {
+    console.log("UPDATE ERROR =", err.response?.data);
+    toast.error(err.response?.data?.message || "Failed to update");
+  }
+};
 
   const removeItem = async (itemId) => {
     try {
@@ -45,17 +52,24 @@ export default function CartPage() {
   };
 
   const handleCheckout = async () => {
-    setCheckingOut(true);
-    try {
-      const res = await orderApi.checkout();
-      toast.success('Order placed successfully!');
-      setCart({ items: [], total: 0 });
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Checkout failed');
-    } finally {
-      setCheckingOut(false);
-    }
-  };
+  setCheckingOut(true);
+
+  try {
+    const res = await orderApi.checkout();
+
+    console.log('SUCCESS:', res.data);
+
+    toast.success('Order placed successfully!');
+    setCart({ items: [], total: 0 });
+  } catch (err) {
+    console.log('STATUS:', err.response?.status);
+    console.log('DATA:', err.response?.data);
+
+    toast.error(err.response?.data?.message || 'Checkout failed');
+  } finally {
+    setCheckingOut(false);
+  }
+};
 
   if (loading) {
     return (
@@ -102,20 +116,34 @@ export default function CartPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                        className="rounded-lg border p-1 dark:border-gray-600"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="rounded-lg border p-1 dark:border-gray-600"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
+  <button
+    onClick={() =>
+      updateQuantity(
+        item.id,
+        Math.max(1, item.quantity - 1)
+      )
+    }
+    className="rounded-lg border p-1 dark:border-gray-600"
+  >
+    <Minus className="h-4 w-4" />
+  </button>
+
+  <span className="w-8 text-center">{item.quantity}</span>
+
+  <button
+    onClick={() => {
+      if (item.quantity >= item.product.quantity) {
+        toast.error('No more stock available');
+        return;
+      }
+
+      updateQuantity(item.id, item.quantity + 1);
+    }}
+    className="rounded-lg border p-1 dark:border-gray-600"
+  >
+    <Plus className="h-4 w-4" />
+  </button>
+</div>
                     <div className="flex items-center gap-4">
                       <span className="font-semibold">
                         {formatCurrency(item.product.price * item.quantity)}

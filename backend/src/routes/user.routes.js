@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getUsers,
+  createUser,
   getUser,
   updateUser,
   deleteUser,
@@ -10,7 +11,12 @@ import {
 import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = Router();
-
+router.post(
+  '/',
+  authenticate,
+  authorize('ADMIN'),
+  createUser
+);
 router.get('/', authenticate, authorize('ADMIN'), getUsers);
 router.get('/suppliers', authenticate, authorize('ADMIN', 'SUPPLIER'), getSuppliers);
 router.get('/farmers', authenticate, authorize('ADMIN', 'FARMER'), getFarmers);

@@ -138,7 +138,7 @@ export default function LandingPage() {
               Smart Agriculture Platform
             </span>
             <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Grow Agriculture for Your{' '}
+              Welcome Agriculture for Your{' '}
               <span className="text-primary-400">Platform</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-primary-100/90">
